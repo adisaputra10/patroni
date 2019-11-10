@@ -1,0 +1,43 @@
+scope: patroni_cluster_1
+name: member_1
+
+restapi:
+  listen: 0.0.0.0:8008
+  connect_address:  0.0.0.0:8008
+
+etcd:
+  hosts: 192.168.1.2:2379 #ip server etcd
+  protocol: http
+
+bootstrap:
+  dcs:
+    ttl: 30
+    loop_wait: 10
+    retry_timeout : 10
+    maximum_lag_on_failover: 1048576
+    postgresql:
+      use_pg_rewind: true
+      use_slots: true
+      parameters:
+        wal_keep_segments: 100
+
+  initdb:
+  - encoding: UTF8
+  - data-checksums
+
+  pg_hba:
+  - host replication replicator 0.0.0.0/0 md5
+  - host all all 0.0.0.0/0 md5
+
+postgresql:
+  listen: 0.0.0.0:5432
+  connect_address: 0.0.0.0:5432
+  data_dir: /var/lib/postgresql/patroni_cluster_1/member_1/data
+  bin_dir: /usr/lib/postgresql/11//bin
+  authentication:
+    replication:
+      username: replicator
+      password: test
+    superuser:
+      username: postgres
+      password: test
